@@ -1,4 +1,4 @@
-# 💰 BudgetTracker-Python
+# 💰 BudgetTrackerApp
 
 A full-featured personal budgeting app built with Python & Tkinter. Tracks expenses, manages categories, and provides analytics through Excel and visual charts.
 
