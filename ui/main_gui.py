@@ -7,6 +7,7 @@ def run_main_app():
     from logic.logic_expense import add_expense
     from ui.category_manager_gui import open_category_manager
     from ui.views_gui import open_monthly_view
+    from ui.category_manager_gui import open_category_manager
 
     initialize_excel()
     categories = load_categories()
@@ -23,6 +24,10 @@ def run_main_app():
     category_cb = ttk.Combobox(root, values=categories, state="readonly")
     category_cb.set("Select category")
     category_cb.pack(pady=5)
+
+    # Inside run_main_app() — after the category_cb definition
+    manage_cat_btn = ttk.Button(root, text="Manage Categories", command=lambda: open_category_manager(root, categories, category_cb))
+    manage_cat_btn.pack(pady=5)
 
     tk.Label(root, text="Amount (₹):").pack()
     amount_entry = tk.Entry(root)
