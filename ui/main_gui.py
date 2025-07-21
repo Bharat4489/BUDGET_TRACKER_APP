@@ -39,14 +39,7 @@ def run_main_app():
     note_entry = tk.Entry(root)
     note_entry.pack(pady=5)
 
-    # 🔁 Update subcategories when a valid category is selected
-    def update_subcategories(event=None):
-        selected_cat = category_cb.get()
-        subcats = subcategories_dict.get(selected_cat, [])
-        subcategory_cb['values'] = subcats
-        subcategory_cb.set("")
-
-    category_cb.bind("<<ComboboxSelected>>", update_subcategories)
+    
 
     # 🔎 Search-as-you-type filtering
     def bind_search_filter(combobox, full_values):
@@ -61,6 +54,18 @@ def run_main_app():
         combobox.bind('<KeyRelease>', on_keyrelease)
 
     bind_search_filter(category_cb, all_categories)
+    bind_search_filter(subcategory_cb, [])
+
+
+    # 🔁 Update subcategories when a category is selected
+    def update_subcategories(event=None):
+        selected_cat = category_cb.get()
+        subcats = subcategories_dict.get(selected_cat, [])
+        subcategory_cb['values'] = subcats
+        subcategory_cb.set("")
+        bind_search_filter(subcategory_cb, subcats)  # ✅ Added live filter
+
+    category_cb.bind("<<ComboboxSelected>>", update_subcategories)
 
     def refresh_comboboxes():
         nonlocal subcategories_dict, all_categories
@@ -95,9 +100,10 @@ def run_main_app():
             messagebox.showerror("Error", "Amount must be a number.")
             return
 
-        full_category = f"{category} > {subcategory}"
-        add_expense(date, full_category, amount, note)
-        messagebox.showinfo("Success", f"✅ ₹{amount} added under '{full_category}' on {date}")
+        main_category = f"{category}"
+        sub_category  = f"{subcategory}"
+        add_expense(date, main_category,sub_category, amount, note)
+        messagebox.showinfo("Success", f"✅ ₹{amount} added under '{main_category}-{sub_category}'on {date}")
         amount_entry.delete(0, tk.END)
         note_entry.delete(0, tk.END)
 
