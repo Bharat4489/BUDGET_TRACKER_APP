@@ -6,13 +6,33 @@ import subprocess
 def initialize_excel():
     os.makedirs("data", exist_ok=True)  # ✅ Ensures the 'data' folder exists
 
-    if not os.path.exists("data/budget_data.xlsx"):
-        df = pd.DataFrame(columns=["Year", "Month", "Weekday", "Date", "Category", "Amount", "Note"])
-        df.to_excel("data/budget_data.xlsx", index=False, engine="openpyxl")
+    # Ensure budget_data.xlsx has the required columns
+    budget_path = "data/budget_data.xlsx"
+    if not os.path.exists(budget_path):
+        df = pd.DataFrame(columns=["Year", "Month", "Weekday", "Date", "Category", "Subcategory", "Amount", "Type", "Note"])
+        df.to_excel(budget_path, index=False, engine="openpyxl")
+    else:
+        df = pd.read_excel(budget_path, engine="openpyxl")
+        required_cols = ["Year", "Month", "Weekday", "Date", "Category", "Subcategory", "Amount", "Type", "Note"]
+        for col in required_cols:
+            if col not in df.columns:
+                df[col] = ""
+        df.to_excel(budget_path, index=False, engine="openpyxl")
 
-    if not os.path.exists("data/categories.xlsx"):
-        df = pd.DataFrame({"Category": ["Food", "Transport", "Rent"]})
-        df.to_excel("data/categories.xlsx", index=False, engine="openpyxl")
+    # Ensure categories.xlsx is in new format
+    cat_path = "data/categories.xlsx"
+    if not os.path.exists(cat_path):
+        df = pd.DataFrame({
+            "Category": ["Food", "Transport", "Rent", "Utilities"],
+            "Subcategory": ["Groceries", "Bus", "Flat", "Electricity"]
+        })
+        df.to_excel(cat_path, index=False, engine="openpyxl")
+    else:
+        df = pd.read_excel(cat_path, engine="openpyxl")
+        if "Subcategory" not in df.columns:
+            df["Subcategory"] = ""
+            df.to_excel(cat_path, index=False, engine="openpyxl")
+
 
 # Function to open the Excel file in the default application
 def open_excel_file(filename="data/budget_data.xlsx"):

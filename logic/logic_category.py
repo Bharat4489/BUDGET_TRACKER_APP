@@ -1,25 +1,49 @@
+# logic/logic_category.py
 import os
 import pandas as pd
 
-CATEGORY_FILE = "data/categories.xlsx"
+def initialize_category_file():
+    path = "data/categories.xlsx"
+    if not os.path.exists(path):
+        df = pd.DataFrame(columns=["Category", "Subcategory"])
+        df.to_excel(path, index=False, engine='openpyxl')
 
 def load_categories():
     df = pd.read_excel("data/categories.xlsx", engine="openpyxl")
-    return df['Category'].tolist()
+    categories = df["Category"].dropna().unique().tolist()
+    subcategories = {
+        cat: df[df["Category"] == cat]["Subcategory"].dropna().tolist()
+        for cat in categories
+    }
+    return subcategories
 
-def add_category(new_cat):
-    df = pd.read_excel("data/categories.xlsx", engine="openpyxl")
-    if new_cat not in df['Category'].values:
-        df = pd.concat([df, pd.DataFrame({"Category": [new_cat]})], ignore_index=True)
-        df.to_excel("data/categories.xlsx", index=False, engine="openpyxl")
-
-def delete_category(cat):
-    df = pd.read_excel("data/categories.xlsx", engine="openpyxl")
-    df = df[df['Category'] != cat]
+def save_categories(subcategories_dict):
+    data = []
+    for cat, subcats in subcategories_dict.items():
+        for sub in subcats:
+            data.append({"Category": cat, "Subcategory": sub})
+    df = pd.DataFrame(data)
     df.to_excel("data/categories.xlsx", index=False, engine="openpyxl")
 
+def delete_category(subcategories_dict, category):
+    if category in subcategories_dict:
+        del subcategories_dict[category]
+    return subcategories_dict
 
-def save_categories(categories):
-    df = pd.DataFrame({"Category": categories})
-    os.makedirs(os.path.dirname(CATEGORY_FILE), exist_ok=True)
-    df.to_excel(CATEGORY_FILE, index=False, engine='openpyxl')
+def delete_subcategory(subcategories_dict, category, subcategory):
+    if category in subcategories_dict and subcategory in subcategories_dict[category]:
+        subcategories_dict[category].remove(subcategory)
+    return subcategories_dict
+
+def add_category(subcategories_dict, category):
+    if category not in subcategories_dict:
+        subcategories_dict[category] = []
+    return subcategories_dict
+
+def add_subcategory(subcategories_dict, category, subcategory):
+    if category in subcategories_dict:
+        if subcategory not in subcategories_dict[category]:
+            subcategories_dict[category].append(subcategory)
+    else:
+        subcategories_dict[category] = [subcategory]
+    return subcategories_dict
